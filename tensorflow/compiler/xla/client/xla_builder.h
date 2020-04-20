@@ -450,6 +450,9 @@ class XlaBuilder {
 
   virtual XlaOp ConstantLiteral(const LiteralSlice& literal);
 
+  XlaOp AsyncOutSend(const XlaOp& operand, const Shape& shape_with_layout,
+                     const string& rendezvous_key);
+
   XlaOp Broadcast(XlaOp operand, absl::Span<const int64> broadcast_sizes);
 
   XlaOp BroadcastInDim(XlaOp operand,
@@ -1280,6 +1283,9 @@ class XlaBuilder {
   // Returns OK status if the given op was built using this builder. Otherwise,
   // returns an error.
   Status CheckOpBuilder(XlaOp op) const;
+
+  friend XlaOp AsyncOutSend(XlaOp operand, const Shape& shape_with_layout,
+                            const string& rendezvous_key);
 
  private:
   XlaOp ConditionalImpl(
@@ -2332,6 +2338,9 @@ XlaOp SetDimensionSize(XlaOp operand, XlaOp val, int64 dimension);
 
 // Returns the same op but with dynamic dimension removed.
 XlaOp RemoveDynamicDimension(XlaOp operand, int64 dimension);
+
+XlaOp AsyncOutSend(XlaOp operand, const Shape& shape_with_layout,
+                   const string& rendezvous_key);
 
 // Implementation details below this point.
 //

@@ -11,6 +11,7 @@ tf_kernel_library(
     srcs = [
         "aggregate_ops.cc",
         "arg_op.cc",
+        "async_io_ops.cc",
         "batch_matmul_op.cc",
         "batch_norm_op.cc",
         "batchtospace_op.cc",
@@ -144,6 +145,7 @@ tf_kernel_library(
         ":if_op",
         ":tensor_list_utils",
         ":while_op",
+        "//tensorflow/compiler/jit/kernels:async_io_rendezvous",
         "//tensorflow/compiler/jit:xla_activity_listener",
         "//tensorflow/compiler/jit:xla_activity_proto_cc",
         "//tensorflow/compiler/tf2xla:common",

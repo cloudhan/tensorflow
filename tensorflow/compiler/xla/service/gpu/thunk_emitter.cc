@@ -16,6 +16,7 @@ limitations under the License.
 #include "tensorflow/compiler/xla/service/gpu/thunk_emitter.h"
 
 #include "tensorflow/compiler/xla/service/custom_call_target_registry.h"
+#include "tensorflow/compiler/xla/service/gpu/async_out_thunk.h"
 #include "tensorflow/compiler/xla/service/gpu/backend_configs.pb.h"
 #include "tensorflow/compiler/xla/service/gpu/convolution_thunk.h"
 #include "tensorflow/compiler/xla/service/gpu/copy_thunk.h"
@@ -196,6 +197,16 @@ std::unique_ptr<Thunk> ThunkEmitter::BuildOutfeedThunk(
   OutfeedConfig config = GetOutfeedConfig(inst);
   return absl::make_unique<OutfeedThunk>(context_->GetThunkInfo(inst),
                                          std::move(config), std::move(slices));
+}
+
+std::unique_ptr<Thunk> ThunkEmitter::BuildAsyncOutSendThunk(
+    const HloInstruction* inst) {
+  CHECK_EQ(HloOpcode::kAsyncOutSend, inst->opcode());
+
+  const HloInstruction* operand = inst->operand(0);
+  return absl::make_unique<AsyncOutSendThunk>(
+      /*input_buffer=*/GetAllocationSlice(*operand), inst,
+      inst->async_out_send_shape(), inst->rendezvous_key());
 }
 
 Status ThunkEmitter::HandleCustomCall(HloInstruction* custom_call) {
@@ -480,5 +491,11 @@ Thunk::ThunkInfo ThunkEmitter::EmissionContext::GetThunkInfo(
       "Thunk:#hlo_op=%s,hlo_module=%s#", hlo->name(), hlo->GetModule()->name());
   return info;
 }
+
+Status ThunkEmitter::HandleAsyncOutSend(HloInstruction* async_out_send) {
+  AddThunkToThunkSequence(BuildAsyncOutSendThunk(async_out_send));
+  return Status::OK();
+}
+
 }  // namespace gpu
 }  // namespace xla

@@ -2072,7 +2072,8 @@ absl::flat_hash_set<string> GetKnownXLAAllowlistOp() {
                                      "_Arg",
                                      "_ArrayToList",
                                      "_ListToArray",
-                                     "_Retval"};
+                                     "_Retval",
+                                     "_XlaAsyncOutSend"};
   return result;
 }
 
