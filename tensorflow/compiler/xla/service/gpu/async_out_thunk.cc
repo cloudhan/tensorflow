@@ -21,11 +21,18 @@ limitations under the License.
 namespace xla {
 namespace gpu {
 
+AsyncOutSendConfig GetAsyncOutSendConfig(const HloInstruction* instr) {
+  AsyncOutSendConfig config;
+  config.input_shape = instr->operand(0)->shape();
+  return config;
+}
+
 AsyncOutSendThunk::AsyncOutSendThunk(
+    ThunkInfo thunk_info, AsyncOutSendConfig&& config,
     const BufferAllocation::Slice& input_buffer,
-    const HloInstruction* hlo_instruction, const Shape& async_out_send_shape,
-    std::string key)
-    : Thunk(Kind::kAsyncOutSend, hlo_instruction),
+    const Shape& async_out_send_shape, std::string key)
+    : Thunk(Kind::kAsyncOutSend, thunk_info),
+      config_(config),
       input_buffer_(input_buffer),
       async_out_send_shape_(async_out_send_shape),
       key_(std::move(key)) {
@@ -36,19 +43,17 @@ Status AsyncOutSendThunk::ExecuteOnStream(const ExecuteParams& params) {
   auto& buffer_allocations = *params.buffer_allocations;
 
   auto op_profiler =
-      params.profiler->MakeScopedInstructionProfiler(hlo_instruction());
+      params.profiler->MakeScopedInstructionProfiler(profile_index());
   se::DeviceMemoryBase addr =
       buffer_allocations.GetDeviceAddress(input_buffer_);
 
-  VLOG(4) << "AsyncOutSendThunk on GPU: " << hlo_instruction()->ToString()
-          << " with buf size " << addr.size() << " @" << addr.opaque()
-          << ", key " << key_ << ", hash " << key_hash_;
+  VLOG(4) << "AsyncOutSendThunk with buf size " << addr.size() << " @"
+          << addr.opaque() << ", key " << key_ << ", hash " << key_hash_;
 
   tensorflow::AsyncIoRendezvous::TensorPayload payload;
   payload.addr = addr;
-  CHECK(ShapeUtil::Equal(async_out_send_shape_,
-                         hlo_instruction()->operand(0)->shape()));
-  payload.shape = hlo_instruction()->operand(0)->shape();
+  CHECK(ShapeUtil::Equal(async_out_send_shape_, config_.input_shape));
+  payload.shape = config_.input_shape;
   tensorflow::GetXlaAsyncIORendezvous()->Send(key_hash_, payload);
 
   return Status::OK();

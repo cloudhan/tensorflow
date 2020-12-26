@@ -203,9 +203,11 @@ std::unique_ptr<Thunk> ThunkEmitter::BuildAsyncOutSendThunk(
     const HloInstruction* inst) {
   CHECK_EQ(HloOpcode::kAsyncOutSend, inst->opcode());
 
+  AsyncOutSendConfig config = GetAsyncOutSendConfig(inst);
   const HloInstruction* operand = inst->operand(0);
   return absl::make_unique<AsyncOutSendThunk>(
-      /*input_buffer=*/GetAllocationSlice(*operand), inst,
+      context_->GetThunkInfo(inst), std::move(config),
+      /*input_buffer=*/GetAllocationSlice(*operand),
       inst->async_out_send_shape(), inst->rendezvous_key());
 }
 

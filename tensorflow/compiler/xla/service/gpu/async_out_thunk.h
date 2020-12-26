@@ -23,14 +23,20 @@ limitations under the License.
 namespace xla {
 namespace gpu {
 
+struct AsyncOutSendConfig {
+  Shape input_shape;
+};
+
+AsyncOutSendConfig GetAsyncOutSendConfig(const HloInstruction* instr);
+
 // A thunk that asynchronously sends out data. This thunk performs no copies
 // at all but just passes the device pointer to a corresponding AsyncOutRecv op.
 class AsyncOutSendThunk : public Thunk {
  public:
   // Constructs a AsyncOutSendThunk that sends out data to a corresponding
   // AsyncOutRecv on the same device.
-  AsyncOutSendThunk(const BufferAllocation::Slice& input_buffer,
-                    const HloInstruction* hlo_instruction,
+  AsyncOutSendThunk(ThunkInfo thunk_info, AsyncOutSendConfig&& config,
+                    const BufferAllocation::Slice& input_buffer,
                     const Shape& async_out_send_shape, std::string key);
 
   AsyncOutSendThunk(const AsyncOutSendThunk&) = delete;
@@ -39,6 +45,7 @@ class AsyncOutSendThunk : public Thunk {
   Status ExecuteOnStream(const ExecuteParams& params) override;
 
  private:
+  const AsyncOutSendConfig config_;
   const BufferAllocation::Slice input_buffer_;
   Shape async_out_send_shape_;
   std::string key_;
