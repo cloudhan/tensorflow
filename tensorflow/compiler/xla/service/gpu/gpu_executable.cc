@@ -564,7 +564,7 @@ StatusOr<ExecutionOutput> GpuExecutable::ExecuteAsyncOnStream(
     TF_ASSIGN_OR_RETURN(const BufferAllocation::Slice slice,
                         this->assignment_->GetUniqueSlice(opnd, {}));
     se::DeviceMemoryBase src_base =
-        buffer_allocations->GetDeviceAddress(slice.index());
+        buffer_allocations.GetDeviceAddress(slice.index());
     CHECK(!src_base.is_null() || src_base.size() == 0);
     buffers_in_result.insert(src_base);
   }
