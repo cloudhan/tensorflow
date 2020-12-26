@@ -216,6 +216,9 @@ class XlaTensorBuffer : public TensorBuffer {
   Allocator* allocator_;
 };
 
+Tensor MakeTensor(DataType dtype, const TensorShape& shape,
+                  se::DeviceMemoryBase buffer, Allocator* allocator);
+
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_COMPILER_JIT_XLA_LAUNCH_UTIL_H_

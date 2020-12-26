@@ -47,9 +47,8 @@ AsyncIoRendezvous::DoneCallback make_recv_callback(
           auto data_type =
               EncodePrimitiveTypeAsDataType(val.shape.element_type())
                   .ValueOrDie();
-          tensor =
-              XlaTensorBuffer::MakeTensor(data_type, tensor_shape, val.addr,
-                                          ctx->device()->GetAllocator({}));
+          tensor = MakeTensor(data_type, tensor_shape, val.addr,
+                              ctx->device()->GetAllocator({}));
         }
 
         ctx->SetStatus(s);

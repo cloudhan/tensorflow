@@ -271,7 +271,7 @@ XlaComputationLaunchContext::PopulateInputs(
 }
 
 // Construct the tensor for the given type and buffer.
-static Tensor MakeTensor(DataType dtype, const TensorShape& shape,
+Tensor MakeTensor(DataType dtype, const TensorShape& shape,
                          se::DeviceMemoryBase buffer, Allocator* allocator) {
   size_t expected_size = shape.num_elements() * DataTypeSize(dtype);
   auto* tensor_buffer = new XlaTensorBuffer(buffer.opaque(), expected_size,
