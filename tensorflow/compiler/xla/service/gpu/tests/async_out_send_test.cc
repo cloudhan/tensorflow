@@ -139,7 +139,7 @@ TEST_F(AsyncOutSendTest, SingleAsyncOutSendR3F32_RecvSend) {
 TEST_F(AsyncOutSendTest, LargeAsyncOutSend) {
   Array4D<float> array(80, 100, 8, 128);
   array.FillIota(1.0f);
-  float host_ptr[80 * 100 * 8 * 128];
+  static float host_ptr[80 * 100 * 8 * 128];
   TestAsyncOutSendRoundTrip(LiteralUtil::CreateR4FromArray4D<float>(array),
                             host_ptr);
   EXPECT_TRUE(host_ptr[0] == 1.0f);
@@ -149,7 +149,7 @@ TEST_F(AsyncOutSendTest, LargeAsyncOutSend) {
 TEST_F(AsyncOutSendTest, LargeAsyncOutSend_RecvSend) {
   Array4D<float> array(80, 100, 8, 128);
   array.FillIota(1.0f);
-  float host_ptr[80 * 100 * 8 * 128];
+  static float host_ptr[80 * 100 * 8 * 128];
   TestAsyncOutSendRoundTripRecvSend(
       LiteralUtil::CreateR4FromArray4D<float>(array), host_ptr);
   EXPECT_TRUE(host_ptr[0] == 1.0f);
